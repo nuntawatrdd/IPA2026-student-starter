@@ -51,6 +51,19 @@ def _parse_textfsm_list(output):
     raise RuntimeError("TextFSM failed to parse CLI output")
 
 
+_NO_INTERFACE_MARKERS = ("invalid input", "incomplete command", "does not exist")
+
+
+def _show_ip_interface(conn, interface_name):
+    """Run `show ip interface` and return parsed rows; [] when the interface is absent."""
+    command = f"show ip interface {interface_name}"
+    raw = conn.send_command(command)
+    lower = raw.strip().lower() if isinstance(raw, str) else ""
+    if not lower or any(marker in lower for marker in _NO_INTERFACE_MARKERS):
+        return []
+    return _parse_textfsm_list(conn.send_command(command, use_textfsm=True))
+
+
 def _default_netmiko_get(router, interface_name):
     from netmiko import ConnectHandler
 
@@ -64,16 +77,12 @@ def _default_netmiko_get(router, interface_name):
     }
 
     with ConnectHandler(**device) as conn:
-        ip_raw = conn.send_command(
-            f"show ip interface {interface_name}",
-            use_textfsm=True,
-        )
+        ip_info = _show_ip_interface(conn, interface_name)
         desc_raw = conn.send_command(
             "show interfaces description",
             use_textfsm=True,
         )
 
-    ip_info = _parse_textfsm_list(ip_raw)
     descriptions = desc_raw if isinstance(desc_raw, list) else []
     return ip_info, descriptions
 
@@ -93,11 +102,7 @@ def _default_netmiko_delete(router, interface_name):
     target_norm = _normalize_if_name(interface_name)
 
     with ConnectHandler(**device) as conn:
-        ip_raw = conn.send_command(
-            f"show ip interface {interface_name}",
-            use_textfsm=True,
-        )
-        ip_info = _parse_textfsm_list(ip_raw)
+        ip_info = _show_ip_interface(conn, interface_name)
         exists = any(
             _normalize_if_name(item.get("interface")) == target_norm
             for item in ip_info
@@ -108,11 +113,7 @@ def _default_netmiko_delete(router, interface_name):
 
         conn.send_config_set([f"no interface {interface_name}"])
 
-        verify_raw = conn.send_command(
-            f"show ip interface {interface_name}",
-            use_textfsm=True,
-        )
-        verify_info = _parse_textfsm_list(verify_raw)
+        verify_info = _show_ip_interface(conn, interface_name)
         still_exists = any(
             _normalize_if_name(item.get("interface")) == target_norm
             for item in verify_info
