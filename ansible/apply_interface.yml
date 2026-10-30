@@ -1,0 +1,14 @@
+---
+- name: Apply Loopback interface configuration
+  hosts: target
+  gather_facts: false
+  tasks:
+    - name: Configure Loopback interface
+      cisco.ios.ios_config:
+        parents:
+          - "interface {{ interface_name }}"
+        lines:
+          - "description {{ description }}"
+          - "ip address {{ ipv4_address }} {{ netmask }}"
+          - "{{ 'shutdown' if (shutdown | bool) else 'no shutdown' }}"
+        defaults: true

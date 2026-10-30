@@ -1,0 +1,10 @@
+version: 1
+router: <assigned-router-ip>
+method: restconf
+action: apply
+desired:
+  interface:
+    name: Loopback<student-id>
+    ipv4: <unused-ipv4>/32
+    description: IPA2026-<student-id>
+    admin_state: up

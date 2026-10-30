@@ -1,0 +1,7 @@
+version: 1
+router: <assigned-router-ip>
+method: restconf
+action: status
+desired:
+  interface:
+    name: Loopback<student-id>

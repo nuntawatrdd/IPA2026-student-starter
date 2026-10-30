@@ -1,0 +1,11 @@
+desired:
+  name: Loopback66070123
+  ipv4: 172.23.123.20/32
+  description: IPA2026-NEW-DESC
+  admin_state: up
+
+current:
+  name: Loopback66070123
+  ipv4: 172.23.123.10/32
+  description: IPA2026-OLD-DESC
+  admin_state: down

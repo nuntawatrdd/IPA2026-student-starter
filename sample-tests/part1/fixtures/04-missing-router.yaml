@@ -1,0 +1,7 @@
+version: 1
+method: restconf
+action: status
+
+desired:
+  interface:
+    name: Loopback123

@@ -1,0 +1,8 @@
+version: 1
+router: 10.0.29.101
+method: ssh
+action: status
+
+desired:
+  interface:
+    name: Loopback123
